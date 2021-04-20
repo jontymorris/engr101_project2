@@ -16,8 +16,6 @@ vector<bool> getRed() {
 
     for (int x=0; x<320; x++) {
         for (int y=0; y<220; y++) {
-            //Pixel pixel = get_pixel(y, x);
-
             float red = (float) get_pixel(y, x, 0);
             float green = (float) get_pixel(y, x, 1);
             float blue = (float) get_pixel(y, x, 2);
