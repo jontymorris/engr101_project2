@@ -1,12 +1,13 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include "video_proc.hpp"
+#include "E101.h"
 
 using namespace std;
 
-void nextImage(string path) {
-    OpenPPMFile(path);
+void nextImage() {
+    take_picture();
+	update_screen();
 }
 
 vector<bool> getRed() {
@@ -15,11 +16,11 @@ vector<bool> getRed() {
 
     for (int x=0; x<320; x++) {
         for (int y=0; y<220; y++) {
-            Pixel pixel = get_pixel(y, x);
+            //Pixel pixel = get_pixel(y, x);
 
-            float red = (float) pixel.red;
-            float green = (float) pixel.green;
-            float blue = (float) pixel.blue;
+            float red = (float) get_pixel(y, x, 0);
+            float green = (float) get_pixel(y, x, 1);
+            float blue = (float) get_pixel(y, x, 2);
             
             float redness = red / (red + green + blue);
             output.push_back(redness > 0.6);
@@ -50,36 +51,47 @@ bool isRubyPresent(vector<bool> redScale) {
     return totalRed / (320 * 220) > 0.001;
 }
 
+void setupConnection() {
+    int err = init(0);
+    cout<<" Starting. err="<<err<<endl;
+    open_screen_stream();
+}
+
 int main() {
-    string base = "./Images/Core/";
-    cout << base << endl;
+    vector<bool> original;
+    vector<bool> current;
 
-    nextImage(base + "0.ppm");
-    vector<bool> original = getRed();
+    // setup
+    setupConnection();
+    nextImage();
+    original = getRed();
 
+    // check ruby is initially present
     if (!isRubyPresent(original)) {
-        cout << "Ruby missing! Not continuing." << endl;
+        cout << "Ruby missing! Find the ruby and restart." << endl;
         return 0;
     }
 
     cout << "Ruby is present" << endl;
 
-    for (int i=1; i<20; i++) {
-        nextImage(base + to_string(i) + ".ppm");
-        vector<bool> current = getRed();
-
-        cout << "#" << i << endl;
+    // now start ruby watching loop
+    while (true) {
+        nextImage();
+        current = getRed();
 
         if (!isRubyPresent(current)) {
-            cout << "Ruby is missing! Not continuing." << endl;
-            return 0;
+            cout << "Ruby is missing!" << endl;
+            break;
         }
 
         if (!isSimilar(original, current)) {
             cout << "Don't steal my ruby!" << endl;
-            return 0;
+            break;
         }
+
+        sleep1(100);
     }
 
+    close_screen_stream();
     return 0;
 }

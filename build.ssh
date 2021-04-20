@@ -1,3 +1,9 @@
-sshpass -p 'raspberry' scp ./* pi@10.140.139.223:/home/pi/Downloads/
-sshpass -p 'raspberry' ssh pi@10.140.139.223 "cd /home/pi/Downloads && g++ ./main.cpp -le101 && ./a.out"
+host=10.140.139.223
 
+echo "Copying files..."
+sshpass -p 'raspberry' scp ./* pi@$host:/home/pi/Downloads/
+
+echo "Building project..."
+sshpass -p 'raspberry' ssh pi@$host "cd /home/pi/Downloads && g++ ./main.cpp -le101 && sudo ./a.out"
+
+echo "Done."
