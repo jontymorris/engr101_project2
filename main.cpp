@@ -7,15 +7,18 @@ using namespace std;
 
 void nextImage() {
     take_picture();
-	update_screen();
+    update_screen();
 }
 
 vector<bool> getRed() {
-    vector<bool> output;
-    output.reserve(320 * 220);
+    int cropX = 50;
+    int cropY = 50;
 
-    for (int x=0; x<320; x++) {
-        for (int y=0; y<220; y++) {
+    vector<bool> output;
+    output.reserve((320 - cropX * 2) * (220 - cropY * 2));
+
+    for (int x=cropX; x<320-cropX; x+=5) {
+        for (int y=cropY; y<220-cropY; y+=5) {
             float red = (float) get_pixel(y, x, 0);
             float green = (float) get_pixel(y, x, 1);
             float blue = (float) get_pixel(y, x, 2);
@@ -28,25 +31,25 @@ vector<bool> getRed() {
     return output;
 }
 
-float isSimilar(vector<bool> red1, vector<bool> red2) {
+float isSimilar(vector<bool> image1, vector<bool> image2) {
     float similar = 0;
 
-    for (int i=0; i<red1.size(); i++) {
-        if (red1[i] == red2[i])
+    for (int i=0; i<image1.size(); i++) {
+        if (image1[i] == image2[i])
             similar += 1;
     }
 
-    return similar / (320 * 220) > 0.93;
+    return similar / image1.size() > 0.90;
 }
 
-bool isRubyPresent(vector<bool> redScale) {
+bool isRubyPresent(vector<bool> image) {
     float totalRed = 0;
-    for (int i=0; i<redScale.size(); i++) {
-        if (redScale[i])
+    for (int i=0; i<image.size(); i++) {
+        if (image[i])
             totalRed += 1;
     }
 
-    return totalRed / (320 * 220) > 0.001;
+    return totalRed / image.size() > 0.001;
 }
 
 void setupConnection() {
@@ -86,8 +89,6 @@ int main() {
             cout << "Don't steal my ruby!" << endl;
             break;
         }
-
-        sleep1(100);
     }
 
     close_screen_stream();
